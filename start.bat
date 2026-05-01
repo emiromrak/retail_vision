@@ -16,10 +16,12 @@ pip install -r requirements.txt -q
 echo.
 echo  [2/2] RetailVision baslatiliyor...
 echo        (Node.js + YOLO servisi otomatik olarak birlikte calisiyor)
-echo        Dashboard: http://localhost:8000
+echo        Dashboard: http://127.0.0.1:8000
 echo.
 
-start "" http://localhost:8000
+:: Tarayıcıyı 5 saniye sonra açmak için arkaplanda bir işlem başlatıyoruz
+start "" cmd /c "timeout /t 5 >nul & start http://127.0.0.1:8000"
+
 cd backend-js
 node --experimental-sqlite server.js
 

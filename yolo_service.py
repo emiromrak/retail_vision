@@ -11,8 +11,8 @@ from pathlib import Path
 from datetime import datetime
 import shutil
 
-from backend.analyzer import analyzer
-from backend.camera import camera_manager
+from analyzer import analyzer
+from camera import camera_manager
 
 BASE_DIR = Path(__file__).parent
 UPLOAD_DIR = BASE_DIR / "uploads"
