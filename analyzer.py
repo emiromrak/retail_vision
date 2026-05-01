@@ -5,7 +5,7 @@ import base64
 from pathlib import Path
 import os
 
-MODEL_PATH = Path(__file__).parent.parent / "yolov8n.pt"
+MODEL_PATH = Path(__file__).parent / "yolov8n.pt"
 
 # Color palette for bounding boxes
 COLORS = [
@@ -42,7 +42,7 @@ class RetailAnalyzer:
 
     def _run_detection(self, img: np.ndarray, conf: float) -> dict:
         results = self.model(img, conf=conf, verbose=False)
-        
+
         stok_durumu = {}
         annotated = img.copy()
 

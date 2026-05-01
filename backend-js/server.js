@@ -15,21 +15,26 @@ const app  = express();
 const PORT = 8000;
 
 // ── Python YOLO Mikroservisini Otomatik Başlat ────────────────────────────────
+// NOT: Kamera/YOLO servisi dahili port 8001'de çalışır.
+// Frontend sadece port 8000'i kullanır — Node.js arkada proxy yapar.
 function startYoloService() {
   const projectRoot = path.join(__dirname, '..');
 
-  console.log('  🐍 Python YOLO servisi başlatılıyor...');
+  console.log('  🐍 Python YOLO servisi başlatılıyor (dahili port 8001)...');
 
-  const pyProcess = spawn(
-    'python',
-    ['-m', 'uvicorn', 'yolo_service:app', '--host', '127.0.0.1', '--port', '8001', '--log-level', 'warning'],
-    {
+  // Windows'ta 'python' yerine 'py' (Python Launcher) kullan
+  const pythonCmd = process.platform === 'win32' ? 'py' : 'python3';
+  const args = ['-m', 'uvicorn', 'yolo_service:app', '--host', '127.0.0.1', '--port', '8001', '--log-level', 'warning'];
+
+  function spawnPython(cmd) {
+    return spawn(cmd, args, {
       cwd: projectRoot,
       stdio: ['ignore', 'pipe', 'pipe'],
-      // Windows'ta ayrı pencere açma
       detached: false,
-    }
-  );
+    });
+  }
+
+  let pyProcess = spawnPython(pythonCmd);
 
   pyProcess.stdout.on('data', (data) => {
     const msg = data.toString().trim();
@@ -38,15 +43,23 @@ function startYoloService() {
 
   pyProcess.stderr.on('data', (data) => {
     const msg = data.toString().trim();
-    // uvicorn INFO mesajlarını filtrele, sadece önemli olanları göster
     if (msg && !msg.includes('INFO') && !msg.includes('WARNING: This is a development server')) {
       console.log(`  [YOLO] ${msg}`);
     }
   });
 
   pyProcess.on('error', (err) => {
-    console.error(`  ❌ YOLO servisi başlatılamadı: ${err.message}`);
-    console.error('     Python ve uvicorn kurulu olduğundan emin olun.');
+    // 'py' bulunamazsa 'python' ile tekrar dene
+    if (err.code === 'ENOENT' && pythonCmd === 'py') {
+      console.log('  ⚠️  "py" bulunamadı, "python" ile tekrar deneniyor...');
+      pyProcess = spawnPython('python');
+      pyProcess.on('error', (err2) => {
+        console.error(`  ❌ Python başlatılamadı: ${err2.message}`);
+        console.error('     Python kurulu olduğundan ve PATH\'e ekli olduğundan emin olun.');
+      });
+    } else {
+      console.error(`  ❌ YOLO servisi başlatılamadı: ${err.message}`);
+    }
   });
 
   pyProcess.on('exit', (code, signal) => {
@@ -56,9 +69,9 @@ function startYoloService() {
   });
 
   // Ana process kapanınca Python'u da kapat
-  process.on('exit', () => pyProcess.kill());
-  process.on('SIGINT', () => { pyProcess.kill(); process.exit(0); });
-  process.on('SIGTERM', () => { pyProcess.kill(); process.exit(0); });
+  process.on('exit', () => { try { pyProcess.kill(); } catch(_) {} });
+  process.on('SIGINT', () => { try { pyProcess.kill(); } catch(_) {} process.exit(0); });
+  process.on('SIGTERM', () => { try { pyProcess.kill(); } catch(_) {} process.exit(0); });
 
   return pyProcess;
 }
@@ -114,6 +127,7 @@ app.listen(PORT, '0.0.0.0', () => {
   console.log('');
   console.log(`  ✅ RetailVision hazır    : http://localhost:${PORT}`);
   console.log(`  📊 Dashboard            : http://localhost:${PORT}`);
-  console.log(`  🔌 YOLO + Kamera        : arka planda çalışıyor`);
+  console.log(`  🔌 YOLO + Kamera        : dahili olarak çalışıyor (dışarıya kapalı)`);
+  console.log(`  🌐 Tek adres            : http://localhost:${PORT} — kamera dahil HER ŞEY buradan`);
   console.log('');
 });
