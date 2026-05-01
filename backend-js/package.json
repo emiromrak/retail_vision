@@ -1,0 +1,21 @@
+{
+  "name": "retailvision-backend",
+  "version": "2.0.0",
+  "description": "RetailVision Node.js Backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --experimental-sqlite server.js",
+    "dev": "nodemon --exec \"node --experimental-sqlite\" server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "form-data": "^4.0.0",
+    "multer": "^2.0.0",
+    "node-fetch": "^2.7.0",
+    "openai": "^4.28.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.0"
+  }
+}

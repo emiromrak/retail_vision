@@ -9,16 +9,18 @@ echo  ██╔══██╗██╔══╝     ██║   ██╔══
 echo  ██║  ██║███████╗   ██║   ██║  ██║██║███████╗╚████╔╝ ██║███████║██║╚██████╔╝██║ ╚████║
 echo  ╚═╝  ╚═╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝╚══════╝ ╚═══╝  ╚═╝╚══════╝╚═╝ ╚═════╝ ╚═╝  ╚═══╝
 echo.
-echo  [1/2] Gereksinimler kontrol ediliyor...
+
+echo  [1/2] Python gereksinimleri kontrol ediliyor...
 pip install -r requirements.txt -q
 
 echo.
-echo  [2/2] RetailVision backend baslatiliyor...
+echo  [2/2] RetailVision baslatiliyor...
+echo        (Node.js + YOLO servisi otomatik olarak birlikte calisiyor)
 echo        Dashboard: http://localhost:8000
-echo        API Docs:  http://localhost:8000/docs
 echo.
 
 start "" http://localhost:8000
-uvicorn backend.main:app --host 0.0.0.0 --port 8000 --reload
+cd backend-js
+node --experimental-sqlite server.js
 
 pause

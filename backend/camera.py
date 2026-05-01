@@ -24,8 +24,15 @@ class CameraManager:
             return True
         
         self.source = source
-        self.cap = cv2.VideoCapture(source)
-        
+        # Windows'ta kamera açılış sorunlarını çözmek için cv2.CAP_DSHOW ekleyelim
+        if isinstance(source, int) or str(source).isdigit():
+            src_int = int(source)
+            self.cap = cv2.VideoCapture(src_int, cv2.CAP_DSHOW)
+            if not self.cap.isOpened():
+                self.cap = cv2.VideoCapture(src_int) # Fallback to default
+        else:
+            self.cap = cv2.VideoCapture(source)
+            
         if not self.cap.isOpened():
             return False
 

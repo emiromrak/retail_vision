@@ -3,13 +3,15 @@ import asyncio
 
 client = AsyncOpenAI(base_url="http://localhost:1234/v1", api_key="lm-studio")
 
-SYSTEM_PROMPT = """Sen bir perakende stok yönetimi uzmanısın. 
-Verilen stok verilerini analiz ederek profesyonel, kısa ve öz Türkçe raporlar hazırlarsın. 
-Raporun:
-- Eksik ürünleri belirt
-- Acil temin edilmesi gerekenleri öne çıkar
-- Maksimum 3-4 cümle olsun
-- Kesinlikle Türkçe yaz"""
+SYSTEM_PROMPT = """Sen bir perakende stok yönetimi uzmanısın.
+MUTLAKA ve YALNIZCA Türkçe yaz. İngilizce kesinlikle yasaktır.
+Verilen stok verilerini analiz ederek kısa ve profesyonel bir Türkçe rapor hazırla.
+Kurallar:
+- Tüm yanıt Türkçe olmalı
+- Eksik ürünleri açıkça belirt
+- Acil temin edilmesi gerekenleri vurgula
+- Maksimum 3-4 cümle
+- Samimi ve profesyonel bir dil kullan"""
 
 
 async def generate_report(missing_items: list, detected: dict) -> str:
@@ -21,9 +23,10 @@ async def generate_report(missing_items: list, detected: dict) -> str:
     detected_str = ", ".join(f"{k}: {v}" for k, v in detected.items()) or "Hiç ürün tespit edilmedi"
 
     user_msg = (
+        f"TÜRKÇE RAPOR YAZ. İngilizce kullanma.\n"
         f"Tespit edilen ürünler: {detected_str}\n"
         f"Eksik/kritik ürünler: {missing_str}\n"
-        f"Bu ürünler için acil stok raporu yaz."
+        f"Bu eksikler için Türkçe acil stok raporu hazırla."
     )
 
     try:
